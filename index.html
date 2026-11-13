@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VolunteerHQ — VibeSprint Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-100 text-stone-900 min-h-screen p-4 md:p-6 font-sans">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Top Header -->
+    <header class="bg-white p-5 rounded-xl shadow-sm border border-stone-200 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded uppercase">Problem Card 23</span>
+          <span class="bg-stone-200 text-stone-700 text-xs font-semibold px-2.5 py-1 rounded">Browser-First Mock Prototype</span>
+        </div>
+        <h1 class="text-3xl font-extrabold mt-2 tracking-tight">VolunteerHQ</h1>
+        <p class="text-stone-600 text-sm">Create shifts, manage volunteer sign-ups & check-ins, simulate dropouts, and auto-assign replacements.</p>
+      </div>
+      <!-- Live Dashboard Stats -->
+      <div class="flex gap-3">
+        <div class="bg-stone-50 px-4 py-2.5 rounded-lg border border-stone-200 text-center">
+          <p class="text-[11px] text-stone-500 uppercase font-bold">Total Shifts</p>
+          <p id="statTotal" class="text-2xl font-extrabold text-stone-800">0</p>
+        </div>
+        <div class="bg-red-50 px-4 py-2.5 rounded-lg border border-red-200 text-center">
+          <p class="text-[11px] text-red-600 uppercase font-bold">Understaffed</p>
+          <p id="statUnderstaffed" class="text-2xl font-extrabold text-red-600">0</p>
+        </div>
+        <div class="bg-emerald-50 px-4 py-2.5 rounded-lg border border-emerald-200 text-center">
+          <p class="text-[11px] text-emerald-700 uppercase font-bold">Standby Pool</p>
+          <p id="statStandby" class="text-2xl font-extrabold text-emerald-700">0</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Visible Success / Alert Banner (Rule 03 Validation & Feedback) -->
+    <div id="statusBanner" class="hidden mb-6 p-4 rounded-xl border font-medium text-sm flex items-center justify-between shadow-sm">
+      <span id="statusBannerText"></span>
+      <button onclick="hideBanner()" class="text-xs underline ml-4">Dismiss</button>
+    </div>
+
+    <!-- Judge Demo 3-Step Quick Guide Bar -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="text-xs text-amber-900 space-y-1">
+        <p class="font-bold uppercase tracking-wider text-amber-800">🎯 Judge Demo Verification Path Ready:</p>
+        <p><strong>Step 01:</strong> View shift capacities & sign-ups below &rarr; <strong>Step 02:</strong> Click <em>"⚠️ Simulate Dropout"</em> on any volunteer &rarr; <strong>Step 03:</strong> Click <em>"✨ Assign Suggested Replacement"</em>.</p>
+      </div>
+      <button onclick="resetDemoData()" class="bg-white hover:bg-stone-100 text-stone-700 border border-stone-300 text-xs font-bold px-3 py-2 rounded-lg shrink-0 transition">
+        🔄 Reset Sample Data
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- LEFT COLUMN: Create Shift Form + Standby Pool -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Create Shift Card -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+          <h2 class="text-base font-bold mb-4 flex items-center gap-2">
+            <span class="bg-stone-900 text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-xs">1</span>
+            Create Volunteer Shift
+          </h2>
+          <form id="createShiftForm" class="space-y-3" novalidate>
+            <div>
+              <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Role / Shift Title *</label>
+              <input type="text" id="roleInput" placeholder="e.g., Stage & Audio Desk" 
+                class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Shift Time *</label>
+              <input type="text" id="timeInput" placeholder="e.g., 02:00 PM - 04:00 PM" 
+                class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Location *</label>
+              <input type="text" id="locationInput" placeholder="e.g., AI-ML Lab 4" 
+                class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Required Count *</label>
+                <input type="number" id="countInput" min="1" max="20" value="3" 
+                  class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Skill Tag</label>
+                <select id="skillInput" class="w-full px-2 py-2 border border-stone-300 rounded-lg text-sm bg-white">
+                  <option value="General">General</option>
+                  <option value="Tech Support">Tech Support</option>
+                  <option value="Hospitality">Hospitality</option>
+                  <option value="Logistics">Logistics</option>
+                </select>
+              </div>
+            </div>
+            <p id="formError" class="hidden text-xs text-red-600 font-semibold"></p>
+            <button type="submit" 
+              class="w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-2.5 rounded-lg transition text-sm">
+              + Create Shift
+            </button>
+          </form>
+        </div>
+
+        <!-- Fictional Standby Replacement Pool (For Judge Step 03) -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+          <h2 class="text-base font-bold mb-1 flex items-center gap-2">
+            <span class="bg-emerald-700 text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-xs">3</span>
+            Standby Replacement Pool
+          </h2>
+          <p class="text-xs text-stone-500 mb-3">Fictional backup volunteers ready to auto-fill dropouts.</p>
+          <div id="standbyList" class="space-y-2"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Active Shifts Board (Judge Steps 01, 02, 03) -->
+      <div class="lg:col-span-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span class="bg-stone-900 text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-xs">2</span>
+            Live Shift Board (Sign-Up, Check-In & Dropout Simulator)
+          </h2>
+          <label class="flex items-center gap-2 text-sm bg-white px-3 py-1.5 rounded-lg border border-stone-200 cursor-pointer select-none">
+            <input type="checkbox" id="filterUnderstaffed" class="accent-orange-600 w-4 h-4">
+            <span class="font-medium text-xs">Filter: Understaffed Only</span>
+          </label>
+        </div>
+
+        <div id="shiftsContainer" class="space-y-4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Fictional Sample Data (Rules 01, 02, 04)
+    const initialShifts = [
+      {
+        id: 101,
+        role: "Registration & Check-In Desk",
+        time: "02:30 PM - 03:30 PM",
+        location: "Main Auditorium Lobby",
+        requiredCount: 3,
+        skillTag: "Hospitality",
+        lastDropout: null,
+        volunteers: [
+          { name: "Aarav Verma (Mock)", checkedIn: true },
+          { name: "Diya Nair (Mock)", checkedIn: true },
+          { name: "Kabir Menon (Mock)", checkedIn: false }
+        ]
+      },
+      {
+        id: 102,
+        role: "AI-ML Lab 4 Mentor Runner",
+        time: "03:00 PM - 04:30 PM",
+        location: "AI-ML Lab 4",
+        requiredCount: 2,
+        skillTag: "Tech Support",
+        lastDropout: "Rohan Das (Dropped Out)",
+        volunteers: [
+          { name: "Sneha Hegde (Mock)", checkedIn: true }
+        ]
+      },
+      {
+        id: 103,
+        role: "Refreshments & Logistics",
+        time: "03:30 PM - 04:30 PM",
+        location: "Quadrangle Stall B",
+        requiredCount: 2,
+        skillTag: "Logistics",
+        lastDropout: null,
+        volunteers: [
+          { name: "Vikram Kulkarni (Mock)", checkedIn: false }
+        ]
+      }
+    ];
+
+    const initialStandbyPool = [
+      { id: 201, name: "Ananya Rao (Mock)", skill: "Tech Support", rating: "98% Match • Available Now" },
+      { id: 202, name: "Karthik Shetty (Mock)", skill: "Hospitality", rating: "95% Match • Available Now" },
+      { id: 203, name: "Meera Joshi (Mock)", skill: "Logistics", rating: "92% Match • Available Now" },
+      { id: 204, name: "Zoya Khan (Mock)", skill: "General", rating: "90% Match • Available Now" },
+      { id: 205, name: "Pranav Bhat (Mock)", skill: "Tech Support", rating: "89% Match • Available Now" }
+    ];
+
+    let shifts = JSON.parse(localStorage.getItem('vhq_shifts_v2')) || JSON.parse(JSON.stringify(initialShifts));
+    let standbyPool = JSON.parse(localStorage.getItem('vhq_standby_v2')) || JSON.parse(JSON.stringify(initialStandbyPool));
+
+    function saveState() {
+      localStorage.setItem('vhq_shifts_v2', JSON.stringify(shifts));
+      localStorage.setItem('vhq_standby_v2', JSON.stringify(standbyPool));
+      renderAll();
+    }
+
+    function showBanner(message, type = 'success') {
+      const banner = document.getElementById('statusBanner');
+      const text = document.getElementById('statusBannerText');
+      banner.className = 'mb-6 p-4 rounded-xl border font-medium text-sm flex items-center justify-between shadow-sm ';
+      if (type === 'error' || type === 'warning') {
+        banner.className += 'bg-red-50 border-red-300 text-red-800';
+      } else {
+        banner.className += 'bg-emerald-50 border-emerald-300 text-emerald-900';
+      }
+      text.textContent = message;
+    }
+
+    function hideBanner() {
+      document.getElementById('statusBanner').classList.add('hidden');
+    }
+
+    function resetDemoData() {
+      shifts = JSON.parse(JSON.stringify(initialShifts));
+      standbyPool = JSON.parse(JSON.stringify(initialStandbyPool));
+      saveState();
+      showBanner('🔄 Sample fictional data reset! Ready for Judge Verification Path.', 'success');
+    }
+
+    // Create Shift with Validation (Rule 03)
+    document.getElementById('createShiftForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const role = document.getElementById('roleInput').value.trim();
+      const time = document.getElementById('timeInput').value.trim();
+      const location = document.getElementById('locationInput').value.trim();
+      const count = parseInt(document.getElementById('countInput').value, 10);
+      const skillTag = document.getElementById('skillInput').value;
+      const errEl = document.getElementById('formError');
+
+      if (!role || !time || !location || isNaN(count) || count < 1) {
+        errEl.textContent = "⚠️ Validation Error: Please fill in Role, Time, Location, and at least 1 volunteer.";
+        errEl.classList.remove('hidden');
+        return;
+      }
+      errEl.classList.add('hidden');
+
+      shifts.unshift({
+        id: Date.now(),
+        role,
+        time,
+        location,
+        requiredCount: count,
+        skillTag,
+        lastDropout: null,
+        volunteers: []
+      });
+
+      this.reset();
+      document.getElementById('countInput').value = 2;
+      saveState();
+      showBanner(`✅ Shift "${role}" created! Currently Understaffed (needs ${count} volunteers).`, 'success');
+    });
+
+    // Step 01: Volunteer Sign-Up
+    function signUpVolunteer(shiftId) {
+      const input = document.getElementById(`volInput-${shiftId}`);
+      const name = input.value.trim();
+      if (!name) {
+        showBanner('⚠️ Please enter a volunteer name before clicking Sign Up.', 'warning');
+        return;
+      }
+      const shift = shifts.find(s => s.id === shiftId);
+      if (shift) {
+        shift.volunteers.push({ name: name, checkedIn: false });
+        input.value = '';
+        saveState();
+        showBanner(`✅ ${name} signed up for "${shift.role}"!`, 'success');
+      }
+    }
+
+    // Check-In Toggle
+    function toggleCheckIn(shiftId, index) {
+      const shift = shifts.find(s => s.id === shiftId);
+      if (shift && shift.volunteers[index]) {
+        shift.volunteers[index].checkedIn = !shift.volunteers[index].checkedIn;
+        const v = shift.volunteers[index];
+        saveState();
+        showBanner(`${v.checkedIn ? '✅ Checked in' : '↩️ Undid check-in for'} ${v.name} at "${shift.role}".`, 'success');
+      }
+    }
+
+    // JUDGE STEP 02: Trigger Simulate Dropout & Show Understaffed Role
+    function simulateDropout(shiftId, index) {
+      const shift = shifts.find(s => s.id === shiftId);
+      if (!shift) return;
+
+      // If no index provided, drop the last volunteer in the list
+      const targetIndex = (index !== undefined) ? index : shift.volunteers.length - 1;
+      if (targetIndex < 0 || !shift.volunteers[targetIndex]) {
+        showBanner('⚠️ No volunteers left on this shift to drop out!', 'warning');
+        return;
+      }
+
+      const droppedVolunteer = shift.volunteers.splice(targetIndex, 1)[0];
+      shift.lastDropout = `${droppedVolunteer.name} dropped out just now`;
+      saveState();
+      showBanner(`🚨 DROPOUT SIMULATED: "${droppedVolunteer.name}" dropped out of "${shift.role}". Role is now UNDERSTAFFED! See Suggested Replacement below.`, 'warning');
+    }
+
+    // JUDGE STEP 03: Demonstrate Suggested Replacement Volunteer
+    function getSuggestedReplacement(shift) {
+      if (standbyPool.length === 0) return null;
+      // Match by skillTag first, otherwise pick top standby volunteer
+      return standbyPool.find(p => p.skill === shift.skillTag) || standbyPool[0];
+    }
+
+    function assignReplacement(shiftId, standbyId) {
+      const shift = shifts.find(s => s.id === shiftId);
+      const poolIndex = standbyPool.findIndex(p => p.id === standbyId);
+      if (!shift || poolIndex === -1) return;
+
+      const replacement = standbyPool.splice(poolIndex, 1)[0];
+      shift.volunteers.push({
+        name: `${replacement.name} [Replacement]`,
+        checkedIn: true
+      });
+      shift.lastDropout = null;
+      saveState();
+      showBanner(`✨ REPLACEMENT ASSIGNED: "${replacement.name}" (${replacement.skill}) auto-assigned & checked into "${shift.role}"!`, 'success');
+    }
+
+    document.getElementById('filterUnderstaffed').addEventListener('change', renderAll);
+
+    function renderAll() {
+      // Update top counters
+      const understaffedCount = shifts.filter(s => s.volunteers.length < s.requiredCount).length;
+      document.getElementById('statTotal').textContent = shifts.length;
+      document.getElementById('statUnderstaffed').textContent = understaffedCount;
+      document.getElementById('statStandby').textContent = standbyPool.length;
+
+      // Render Standby Pool
+      const standbyEl = document.getElementById('standbyList');
+      if (standbyPool.length === 0) {
+        standbyEl.innerHTML = `<p class="text-xs text-stone-400 italic">All standby volunteers have been assigned. Click "Reset Sample Data" at top to refill.</p>`;
+      } else {
+        standbyEl.innerHTML = standbyPool.map(p => `
+          <div class="flex items-center justify-between bg-stone-50 px-3 py-2 rounded-lg border border-stone-200 text-xs">
+            <div>
+              <p class="font-bold text-stone-800">${p.name}</p>
+              <p class="text-stone-500">${p.rating}</p>
+            </div>
+            <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">${p.skill}</span>
+          </div>
+        `).join('');
+      }
+
+      // Render Shifts
+      const container = document.getElementById('shiftsContainer');
+      const onlyUnderstaffed = document.getElementById('filterUnderstaffed').checked;
+      const visibleShifts = onlyUnderstaffed
+        ? shifts.filter(s => s.volunteers.length < s.requiredCount)
+        : shifts;
+
+      if (visibleShifts.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-8 rounded-xl border border-stone-200 text-center text-stone-500 text-sm">
+            No understaffed shifts right now! Click <strong>"Simulate Dropout"</strong> on a shift to test Step 02.
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = visibleShifts.map(shift => {
+        const signedUp = shift.volunteers.length;
+        const checkedIn = shift.volunteers.filter(v => v.checkedIn).length;
+        const shortage = Math.max(0, shift.requiredCount - signedUp);
+        const isUnderstaffed = signedUp < shift.requiredCount;
+        const suggested = isUnderstaffed ? getSuggestedReplacement(shift) : null;
+
+        return `
+          <div class="bg-white p-5 rounded-xl shadow-sm border-2 transition ${isUnderstaffed ? 'border-red-400 ring-2 ring-red-100' : 'border-emerald-400'}">
+            
+            <!-- Card Header -->
+            <div class="flex flex-wrap justify-between items-start gap-2 mb-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="text-lg font-extrabold text-stone-900">${shift.role}</h3>
+                  <span class="bg-stone-100 text-stone-700 text-xs font-semibold px-2 py-0.5 rounded border border-stone-200">${shift.skillTag}</span>
+                  ${isUnderstaffed
+                    ? `<span class="bg-red-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full animate-pulse">⚠️ UNDERSTAFFED (Needs ${shortage} more)</span>`
+                    : `<span class="bg-emerald-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">✓ FULLY STAFFED</span>`
+                  }
+                </div>
+                <p class="text-xs text-stone-500 mt-1">
+                  🕒 <strong>${shift.time}</strong> &nbsp;&bull;&nbsp; 📍 <strong>${shift.location}</strong>
+                </p>
+              </div>
+
+              <!-- Quick Judge Step 02 Button -->
+              ${signedUp > 0 ? `
+                <button onclick="simulateDropout(${shift.id})" 
+                  class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 text-xs font-bold px-3 py-1.5 rounded-lg transition">
+                  ⚠️ Simulate Dropout (Step 02)
+                </button>
+              ` : ''}
+            </div>
+
+            ${shift.lastDropout ? `
+              <div class="mb-3 bg-red-50 border border-red-200 text-red-800 text-xs px-3 py-2 rounded-lg font-medium">
+                🚨 <strong>Recent Dropout Alert:</strong> ${shift.lastDropout}
+              </div>
+            ` : ''}
+
+            <!-- Capacity & Check-In Bar (Judge Step 01) -->
+            <div class="bg-stone-100 rounded-lg p-3 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+              <span>Role Capacity Signed Up: <strong class="text-sm ${isUnderstaffed ? 'text-red-600' : 'text-emerald-700'}">${signedUp} / ${shift.requiredCount}</strong></span>
+              <span>Checked In On-Site: <strong class="text-sm text-emerald-700">${checkedIn} / ${signedUp}</strong></span>
+            </div>
+
+            <!-- JUDGE STEP 03: Suggested Replacement Volunteer Box -->
+            ${isUnderstaffed && suggested ? `
+              <div class="mb-4 bg-amber-50 border-2 border-amber-300 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded">✨ Step 03: Suggested Replacement Volunteer</span>
+                  <p class="text-sm font-bold text-stone-900 mt-1">${suggested.name} <span class="text-xs font-normal text-stone-600">(${suggested.skill} • ${suggested.rating})</span></p>
+                </div>
+                <button onclick="assignReplacement(${shift.id}, ${suggested.id})"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shrink-0 shadow-sm transition">
+                  ✨ Assign Replacement Now
+                </button>
+              </div>
+            ` : ''}
+
+            <!-- Signed-up Volunteers List -->
+            <div class="space-y-2 mb-4">
+              ${shift.volunteers.length === 0
+                ? `<p class="text-xs italic text-stone-400 py-1">No volunteers currently signed up for this shift.</p>`
+                : shift.volunteers.map((v, idx) => `
+                  <div class="flex flex-wrap items-center justify-between gap-2 bg-stone-50 px-3 py-2 rounded-lg border border-stone-200 text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold ${v.checkedIn ? 'text-emerald-900' : 'text-stone-800'}">${v.name}</span>
+                      ${v.checkedIn
+                        ? `<span class="text-[11px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold">Checked In ✓</span>`
+                        : `<span class="text-[11px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded font-medium">Not Checked In</span>`
+                      }
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button onclick="toggleCheckIn(${shift.id}, ${idx})"
+                        class="text-xs px-2.5 py-1 rounded font-semibold transition ${v.checkedIn ? 'bg-stone-200 text-stone-700 hover:bg-stone-300' : 'bg-emerald-600 text-white hover:bg-emerald-700'}">
+                        ${v.checkedIn ? 'Undo Check-In' : 'Check In'}
+                      </button>
+                      <button onclick="simulateDropout(${shift.id}, ${idx})"
+                        class="text-xs px-2.5 py-1 rounded font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition"
+                        title="Simulate this volunteer dropping out">
+                        Drop Out
+                      </button>
+                    </div>
+                  </div>
+                `).join('')
+              }
+            </div>
+
+            <!-- Manual Volunteer Sign-up Input -->
+            <div class="flex gap-2 pt-3 border-t border-stone-200">
+              <input type="text" id="volInput-${shift.id}" placeholder="Enter fictional volunteer name to sign up..."
+                class="flex-1 px-3 py-1.5 text-sm border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-800">
+              <button onclick="signUpVolunteer(${shift.id})"
+                class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition">
+                + Sign Up
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

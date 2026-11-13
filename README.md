@@ -86,4 +86,5 @@
 * **Top 3 Improvements Needed for Real Deployment:**
   1. **Real-Time Multi-Device Sync:** Connect state to a WebSocket/Supabase/Firebase backend so multiple organisers across different gates see live check-ins simultaneously.
   2. **Role-Based Auth & QR Check-In:** Separate Organiser Admin dashboards from Volunteer views with unique QR codes for scan-to-check-in at event venues.
-  3. **Automated Time-Conflict Parser & Opt-In Push Alerts:** Parse exact `HH:MM` shift timestamps to prevent overlapping sign-ups and send opt-in web push notifications when a volunteer is reassigned.
+  3. **Automated Time-Conflict Parser & Opt-In Push Alerts:** Parse exact `HH:MM` shift timestamps to prevent overlapping sign-ups and send opt-in web push notifications when a volunteer is reassigned..
+     

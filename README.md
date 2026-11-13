@@ -1,17 +1,14 @@
-# VolunteerHQ — Problem Card 23 (VibeSprint 2026)
+﻿# VolunteerHQ — Event Volunteer & Intelligent Reassignment System
 
-## Overview
-**VolunteerHQ** is a browser-first prototype that enables event organisers to create volunteer shifts, allows volunteers to sign up and check in on-site, highlights understaffed roles in real time, simulates sudden volunteer dropouts, and recommends skill-matched replacement volunteers from a standby pool.
+## Project Overview
+**VolunteerHQ** (Problem Card 23) is a browser-first web prototype built for VibeSprint 2026. Event organisers can create volunteer shifts with required capacities and skill tags, volunteers can sign up and check in on-site, and organisers can handle **last-minute dropouts (Minute 40 Twist)** with real-time understaffed alerts and intelligent replacement recommendations.
 
-## Core Features & Judge Verification Path
-1. **Step 01 — Role Capacity & Sign-Ups:** Displays shifts with time, location, skill tag, required volunteer capacity, live sign-up counts, and on-site check-in toggles.
-2. **Step 02 — Simulate Dropout & Understaffed Alert:** Clicking **"⚠️ Simulate Dropout"** removes a volunteer, triggers a visual dropout alert banner, and highlights the shift card in red as **UNDERSTAFFED**.
-3. **Step 03 — Suggested Replacement Volunteer:** Whenever a role is understaffed, the app automatically matches an available volunteer from the fictional Standby Replacement Pool by skill tag and allows 1-click assignment.
+## Core Features
+- **Shift Creation & Real-Time Capacity Calculations:** Tracks total event staffing percentage, required vs. signed-up counts, and live check-ins.
+- **Volunteer Sign-Up & Check-In Workflows:** 1-click sign-up and on-site check-in status toggles.
+- **Minute 40 Twist — Last-Minute Dropout & Intelligent Reassignment:** When a volunteer cancels last-minute, the interface immediately highlights the understaffed role in red and ranks available replacement volunteers by skill match and availability (from both the Available Standby Pool and cross-shift unassigned volunteers).
+- **100% Browser-First & Privacy Safe:** Uses local state (localStorage) and fictional sample data. Zero external APIs, SMS/WhatsApp integrations, or .env keys required.
 
-## Non-Negotiable Build Rules Compliance
-- **Browser-First & No `.env`:** Runs 100% locally in the browser using `localStorage` and pre-loaded fictional data. Zero external APIs or secret keys required.
-- **Fictional Data Only:** All volunteer names and shifts use fictional mock data.
-
-## How to Run Locally
-1. Clone or download this folder.
-2. Double-click `index.html` to open directly in any web browser (Chrome, Edge, Firefox, Safari).
+## Installation & Run Instructions
+1. Clone or download this repository.
+2. Open index.html directly in any modern web browser (Chrome, Edge, Firefox, Safari). No build step or server installation is required.
